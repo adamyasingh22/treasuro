@@ -1,25 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router} from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { authActions } from "./features/loginSlice";
+import { useEffect } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+//Navigators
+import { PostAuthNavigator } from "./navigators/postAuth";
+import { PreAuthNavigator } from "./navigators/preAuth";
+import { auth } from "./utils/auth";
+import { userActions } from "./features/userSlice";
+
+const App = () => {
+	const dispatch = useDispatch();
+	const loggedIn = !!useSelector(state => state.signin.token)
+
+	console.log("Logged In", loggedIn)
+
+	useEffect(() => {
+		auth.isAuthenticated() && dispatch(authActions.setToken(auth.getToken()));
+		auth.isUserAvailable() && dispatch(userActions.setUser(auth.getUser()));
+	}, [dispatch]);
+
+	return (
+		<Router>
+			{loggedIn ? <PostAuthNavigator /> : <PreAuthNavigator />}
+		</Router>
+	);
+};
 
 export default App;
